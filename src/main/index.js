@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+const fs = require('fs').promises;
 
 function createWindow() {
   // Create the browser window.
@@ -51,7 +52,28 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.handle('read_file', async () => {
+    try {
+       const filePath = "./note_data.json";
+       console.log(`Reading file from path: ${filePath}`);
+       const data = await fs.readFile(filePath, 'utf-8');
+       console.log('File content:', data);
+       return data; // This will be sent back to the renderer process
+    } catch (err) {
+       console.error('Error reading file:', err);
+       throw err; // Propagate the error to the renderer process
+    }
+   });
 
+  ipcMain.handle('write_file', (event, data) => {
+    fs.writeFile("./note_data.json", data, (err) => {s
+      if (err) {
+         console.error('Error writing file:', err);
+      } else {
+         console.log('File written successfully');
+      }
+     });
+  })
   createWindow()
 
   app.on('activate', function () {

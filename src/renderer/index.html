@@ -24,17 +24,24 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-lock-2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v1"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><rect width="8" height="5" x="2" y="13" rx="1"/><path d="M8 13v-2a2 2 0 1 0-4 0v2"/></svg>
               <h3>Note 1</h3>
             </div>
-            <div class="list-item">
-              
-            </div>
-            <div class="list-item">
-              
-            </div>
-            <div class="list-item">
-              
-            </div>
           </div>
         </div>
+        <div id="myModal" class="modal">
+          <div class="modal-content">
+             <span class="close">&times;</span>
+             <h3>Enter Note Name</h3>
+             <input type="text" id="noteName" placeholder="Enter note name...">
+             <button id="submitNote">Submit</button>
+          </div>
+         </div>
+        <div id="passwordModal" class="modal">
+          <div class="modal-content">
+             <span class="passClose">&times;</span>
+             <h3>Enter Note Password</h3>
+             <input type="text" id="notePass" placeholder="Enter password...">
+             <button id="submitPass">Submit</button>
+          </div>
+         </div>
         <div class="main-container">
           <div class="bg">
             <img src="assets/hacker.webp" alt="">
@@ -42,7 +49,7 @@
 
           <div class="chat">
             <div style="display: flex; gap: 5px;">
-              <div class="newchat-button">
+              <div id="newchat-button" class="newchat-button">
                 <h1>New Chat</h1>
               </div>
               
@@ -55,7 +62,7 @@
             </div>
             
             <div class="message-box">
-              <textarea type="text" class="message-input" placeholder="Type message..."></textarea>
+              <textarea id="message-input" type="text" class="message-input" placeholder="Type message..."></textarea>
             </div>
           </div>
           
