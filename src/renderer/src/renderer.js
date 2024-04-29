@@ -105,11 +105,10 @@ function base64ToBinary(base64) {
   const password = "yourPasswordHere";
   const data = "This is a secret message";
 
+  var a = {"iv":"VeYg4dyxjSFCxqoE2NhrZA==","salt":"V7nDwxim1lHGzUutOR71aQ==","data":"OQraJb0JfpLPq9wy8uBkcw=="}
   const { encryptedData, iv, salt } = await encryptData(data, password);
   console.log("Encrypted Data:", binaryToBase64(encryptedData));
 
-  const decryptedData = await decryptData(base64ToBinary(binaryToBase64(encryptedData)), password, iv, salt);
-  console.log("Decrypted Data:", decryptedData);
 })();
 
 var modal = document.getElementById("myModal");
@@ -118,31 +117,43 @@ var span = document.getElementsByClassName("close")[0];
 var saveButton = document.getElementsByClassName("save-button")[0];
 var currentNoteName = "New Note"
 async function savechat() {
-  console.log("simon har en stor svart dase")
-  let textbox_value = document.getElementById('message-input').value
+  var today = new Date();
+  var day = today.getDate();
+  var month = today.getMonth() + 1;
+  var year = today.getFullYear();
+  var formattedDate = month + "/" + day + "/" + year;
+  let textbox_value = document.getElementById('message-input').value;
+  const lines = textbox_value.split('\n');
 
-  //window.safenotes.write_file("hej, simon har en liten svart dase")4
+  let slashCount = 0;
+
+  for (let i = 0; i < lines[0].length; i++) {
+      if (lines[0][i] === '/') {
+          slashCount++;
+      }
+  }
+  if (slashCount == 2) {
+       const remainingLines = lines.slice(2);
+       textbox_value = remainingLines.join('\n');
+  } else {
+       console.log("The first line does not contain two '/' signs.");
+  }
+  let textbox_valueWithDate = formattedDate + "\n\n" + textbox_value;
+ 
   window.safenotes.read_file().then(async(data) => {
     console.log('Data received from main process:', data);
     let json = JSON.parse(data)
 
-    if(!json[currentNoteName])
-    {
-      const { encryptedData, iv, salt } = await encryptData(data, "test");
+    const { encryptedData, iv, salt } = await encryptData(textbox_valueWithDate, "yourPasswordHere");
       json[currentNoteName] = {
         iv: binaryToBase64(iv),
         salt: binaryToBase64(salt),
         data: binaryToBase64(encryptedData)
-      }
+    }
 
-      window.safenotes.write_file(JSON.stringify(json))
-    }
-    else
-    {
-      console.error("Already exists!")
-    }
+    window.safenotes.write_file(JSON.stringify(json))
    }).catch(err => {
-    console.error('Error received from main process:', err);
+    console.error('Error received from main proces:', err);
    });
 
 }
@@ -203,6 +214,7 @@ passSpan.onclick = function() {
 function addClickListenerToListItem(listItem, noteName) {
   listItem.addEventListener('click', function() {
     passModal.style.display = "block";
+    currentNoteName = noteName
   });
 }
 
@@ -227,13 +239,41 @@ function createListItems(notes) {
   }
 }
 
-document.getElementById("submitPass").onclick = function() {
+document.getElementById("submitPass").onclick = async function() {
   var notePass = document.getElementById("notePass").value;
   if (notePass) {
-    passModal.style.display = "none";
-    // ATT GÖRA: Hämta JSON-filen, hitta password och h3, se om det stämmer. Isåfall ladda in innehållet och dekryptera.
+     // Assuming currentNoteName is set somewhere in your code
+     window.safenotes.read_file().then(async(data) => {
+       let json = JSON.parse(data);
+       console.log(currentNoteName);
+ 
+       if (json[currentNoteName]) {
+         var x = json[currentNoteName];
+         console.log(x);
+ 
+         // Convert Base64 to Binary
+         const encryptedDataBinary = base64ToBinary(x.data);
+         const ivBinary = base64ToBinary(x.iv);
+         const saltBinary = base64ToBinary(x.salt);
+ 
+         // Decrypt the data
+         try {
+           const decryptedData = await decryptData(encryptedDataBinary, notePass, ivBinary, saltBinary);
+           document.getElementById('message-input').value = decryptedData
+           console.log("Decrypted Data:", decryptedData);
+         } catch (error) {
+           console.error("Decryption failed:", error);
+         }
+       } else {
+         console.error("Note does not exist!");
+       }
+     }).catch(err => {
+       console.error('error received from main process:', err);
+     });
+     passModal.style.display = "none";
   }
  }
+ 
  
 
 
@@ -249,7 +289,6 @@ function doAThing() {
   })
 
   window.safenotes.read_file().then(async(data) => {
-    console.log('Data received from main process:', data);
     let json = JSON.parse(data)
     createListItems(json)
   })
